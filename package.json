@@ -1,0 +1,34 @@
+{
+  "name": "aegis-discord-security",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @aegis/dashboard dev",
+    "dev:api": "pnpm --filter @aegis/api dev",
+    "dev:bot": "pnpm --filter @aegis/bot dev",
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "eslint . --max-warnings 0",
+    "test": "pnpm -r --if-present test",
+    "test:integration": "pnpm --filter @aegis/api test",
+    "test:security": "pnpm --filter @aegis/security-engine test",
+    "db:generate": "drizzle-kit generate --config packages/database/drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate --config packages/database/drizzle.config.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "@types/node": "^24.3.0",
+    "drizzle-kit": "^0.31.4",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.42.0"
+  }
+}

@@ -1,0 +1,5 @@
+.next/
+.playwright-mcp/
+**/next-env.d.ts
+dist/
+node_modules/
