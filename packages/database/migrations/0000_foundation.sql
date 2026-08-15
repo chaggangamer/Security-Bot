@@ -9,28 +9,8 @@ CREATE TABLE "users" (
   "updated_at" timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE "guilds" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "discord_id" text UNIQUE NOT NULL,
-  "name" text NOT NULL,
-  "active" boolean NOT NULL DEFAULT true,
-  "created_at" timestamptz NOT NULL DEFAULT now(),
-  "updated_at" timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TABLE "guild_settings" (
-  "guild_id" uuid PRIMARY KEY REFERENCES "guilds"("id") ON DELETE CASCADE,
-  "version" integer NOT NULL DEFAULT 1,
-  "anti_raid_enabled" boolean NOT NULL DEFAULT true,
-  "anti_nuke_enabled" boolean NOT NULL DEFAULT true,
-  "automod_enabled" boolean NOT NULL DEFAULT true,
-  "archive_message_content" boolean NOT NULL DEFAULT false,
-  "configuration" jsonb NOT NULL DEFAULT '{}'::jsonb,
-  "updated_at" timestamptz NOT NULL DEFAULT now()
-);
-
 CREATE TABLE "guild_staff" (
-  "guild_id" uuid REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
+  "guild_id" text REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
   "user_id" uuid REFERENCES "users"("id") ON DELETE CASCADE NOT NULL,
   "role" text NOT NULL,
   "scopes" text[] NOT NULL,
@@ -52,7 +32,7 @@ CREATE UNIQUE INDEX "sessions_token_hash_idx" ON "sessions" ("token_hash");
 
 CREATE TABLE "security_incidents" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "guild_id" uuid REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
+  "guild_id" text REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
   "type" text NOT NULL,
   "severity" incident_severity NOT NULL,
   "status" incident_status NOT NULL DEFAULT 'OPEN',
@@ -64,7 +44,7 @@ CREATE INDEX "incidents_guild_detected_idx" ON "security_incidents" ("guild_id",
 
 CREATE TABLE "security_events" (
   "id" uuid PRIMARY KEY,
-  "guild_id" uuid REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
+  "guild_id" text REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
   "incident_id" uuid REFERENCES "security_incidents"("id") ON DELETE SET NULL,
   "discord_actor_id" text,
   "discord_target_id" text,
@@ -80,7 +60,7 @@ CREATE INDEX "security_events_guild_type_created_idx" ON "security_events" ("gui
 CREATE INDEX "security_events_incident_idx" ON "security_events" ("incident_id");
 
 CREATE TABLE "risk_scores" (
-  "guild_id" uuid REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
+  "guild_id" text REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
   "discord_user_id" text NOT NULL,
   "score" integer NOT NULL DEFAULT 0 CHECK ("score" BETWEEN 0 AND 100),
   "level" text NOT NULL DEFAULT 'LOW',
@@ -90,7 +70,7 @@ CREATE TABLE "risk_scores" (
 
 CREATE TABLE "risk_signals" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "guild_id" uuid REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
+  "guild_id" text REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
   "discord_user_id" text NOT NULL,
   "event_id" uuid REFERENCES "security_events"("id") ON DELETE SET NULL,
   "code" text NOT NULL,
@@ -102,7 +82,7 @@ CREATE INDEX "risk_signals_guild_user_created_idx" ON "risk_signals" ("guild_id"
 
 CREATE TABLE "audit_events" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "guild_id" uuid REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
+  "guild_id" text REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
   "user_id" uuid REFERENCES "users"("id") ON DELETE SET NULL,
   "action" text NOT NULL,
   "before" jsonb,
@@ -113,11 +93,10 @@ CREATE TABLE "audit_events" (
 CREATE INDEX "audit_events_guild_created_idx" ON "audit_events" ("guild_id", "created_at");
 
 CREATE TABLE "retention_policies" (
-  "guild_id" uuid REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
+  "guild_id" text REFERENCES "guilds"("id") ON DELETE CASCADE NOT NULL,
   "data_category" text NOT NULL,
   "retention_days" integer CHECK ("retention_days" IS NULL OR "retention_days" > 0),
   "enabled" boolean NOT NULL DEFAULT false,
   "updated_at" timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY ("guild_id", "data_category")
 );
-

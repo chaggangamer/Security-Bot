@@ -35,16 +35,12 @@ export const users = pgTable('users', {
 });
 
 export const guilds = pgTable('guilds', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  discordId: text('discord_id').notNull().unique(),
-  name: text('name').notNull(),
-  active: boolean('active').default(true).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  // Existing application table. Discord guild IDs are text, not UUIDs.
+  id: text('id').primaryKey(),
 });
 
 export const guildSettings = pgTable('guild_settings', {
-  guildId: uuid('guild_id')
+  guildId: text('guild_id')
     .primaryKey()
     .references(() => guilds.id, { onDelete: 'cascade' }),
   version: integer('version').default(1).notNull(),
@@ -59,7 +55,7 @@ export const guildSettings = pgTable('guild_settings', {
 export const guildStaff = pgTable(
   'guild_staff',
   {
-    guildId: uuid('guild_id')
+    guildId: text('guild_id')
       .references(() => guilds.id, { onDelete: 'cascade' })
       .notNull(),
     userId: uuid('user_id')
@@ -93,7 +89,7 @@ export const securityIncidents = pgTable(
   'security_incidents',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    guildId: uuid('guild_id')
+    guildId: text('guild_id')
       .references(() => guilds.id, { onDelete: 'cascade' })
       .notNull(),
     type: text('type').notNull(),
@@ -110,7 +106,7 @@ export const securityEvents = pgTable(
   'security_events',
   {
     id: uuid('id').primaryKey(),
-    guildId: uuid('guild_id')
+    guildId: text('guild_id')
       .references(() => guilds.id, { onDelete: 'cascade' })
       .notNull(),
     incidentId: uuid('incident_id').references(() => securityIncidents.id, {
@@ -139,7 +135,7 @@ export const securityEvents = pgTable(
 export const riskScores = pgTable(
   'risk_scores',
   {
-    guildId: uuid('guild_id')
+    guildId: text('guild_id')
       .references(() => guilds.id, { onDelete: 'cascade' })
       .notNull(),
     discordUserId: text('discord_user_id').notNull(),
@@ -154,7 +150,7 @@ export const riskSignals = pgTable(
   'risk_signals',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    guildId: uuid('guild_id')
+    guildId: text('guild_id')
       .references(() => guilds.id, { onDelete: 'cascade' })
       .notNull(),
     discordUserId: text('discord_user_id').notNull(),
@@ -177,7 +173,7 @@ export const auditEvents = pgTable(
   'audit_events',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    guildId: uuid('guild_id')
+    guildId: text('guild_id')
       .references(() => guilds.id, { onDelete: 'cascade' })
       .notNull(),
     userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
@@ -193,7 +189,7 @@ export const auditEvents = pgTable(
 export const retentionPolicies = pgTable(
   'retention_policies',
   {
-    guildId: uuid('guild_id')
+    guildId: text('guild_id')
       .references(() => guilds.id, { onDelete: 'cascade' })
       .notNull(),
     dataCategory: text('data_category').notNull(),
